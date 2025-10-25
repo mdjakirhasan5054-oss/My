@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="bn">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Screenshot Reward — Auto Robot</title>
+<style>body{font-family:Arial,Helvetica,sans-serif;background:#f6f8fa;color:#111;padding:20px} .card{max-width:720px;margin:20px auto;background:#fff;padding:18px;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,0.06)} input,button{padding:10px;margin-top:8px;width:100%;box-sizing:border-box} button{background:#0b74de;color:#fff;border:0;border-radius:8px}</style>
+</head><body>
+<div class="card">
+  <h2>📸 Screenshot Reward — Auto Robot</h2>
+  <p>প্রতি স্ক্রিনশট = ৫০ পয়সা (0.5 Taka). সর্বোচ্চ ৩টি। Automated worker runs in background on server.</p>
+
+  <label>Username</label>
+  <input id="username" placeholder="user123" />
+  <label>Screenshot</label>
+  <input id="screenshot" type="file" accept="image/*" />
+  <button onclick="upload()">Submit Screenshot</button>
+
+  <hr/>
+  <button onclick="checkBalance()">Check Balance</button>
+  <div id="balance"></div>
+  <hr/>
+  <button onclick="withdraw()">Withdraw (min 50)</button>
+  <div id="status"></div>
+</div>
+
+<script>
+async function upload(){
+  const u = document.getElementById('username').value.trim();
+  const f = document.getElementById('screenshot').files[0];
+  if(!u || !f) return alert('Enter username & select screenshot');
+  const fd = new FormData();
+  fd.append('username', u);
+  fd.append('screenshot', f);
+  const res = await fetch('/api/upload',{method:'POST',body:fd});
+  const data = await res.json();
+  alert(data.message || JSON.stringify(data));
+}
+async function checkBalance(){
+  const u = document.getElementById('username').value.trim();
+  if(!u) return alert('Enter username');
+  const res = await fetch('/api/balance?username=' + encodeURIComponent(u));
+  const d = await res.json();
+  document.getElementById('balance').innerText = 'Balance: ' + d.balance + ' Taka (screenshots: ' + d.screenshots + ')';
+}
+async function withdraw(){
+  const u = document.getElementById('username').value.trim();
+  if(!u) return alert('Enter username');
+  const res = await fetch('/api/withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u})});
+  const d = await res.json();
+  document.getElementById('status').innerText = d.message || JSON.stringify(d);
+}
+</script>
+</body></html>
